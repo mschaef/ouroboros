@@ -3,9 +3,12 @@
 (defn- fail [ & args ]
   (throw (.RuntimeException (str args))))
 
+(defn- envlookup [ var env ]
+  (if (contains? env var)
+    (env var)
+    (fail "Unbound global variable: " var)))
+
 (defn oeval [ form env ]
   (if (symbol? form)
-    (if (contains? env form)
-      (env form)
-      (fail "Unbound symbol " env))
+    (envlookup form env)
     form))
