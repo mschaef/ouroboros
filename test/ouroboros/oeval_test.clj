@@ -18,4 +18,7 @@
 (deftest symbol-oevel
   (let [env '{x 3 y 4}]
     (testing "Symbol evaluates to global environment binding"
-      (is (= (oeval 'x env) 3)))))
+      (is (= (oeval 'x env) 3)))
+
+    (testing "Error is sigaled when a sysmbol is missing in the global environment"
+      (is (thrown? RuntimeException (oeval 'missing env))))))
