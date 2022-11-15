@@ -14,3 +14,8 @@
 
   (testing "Map evaluates to itself."
     (is (= (oeval {:x 3 :y 4} {}) {:x 3 :y 4}))))
+
+(deftest symbol-oevel
+  (let [env '{x 3 y 4}]
+    (testing "Symbol evaluates to global environment binding"
+      (is (= (oeval 'x env) 3)))))

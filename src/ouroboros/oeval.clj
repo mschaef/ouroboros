@@ -1,4 +1,6 @@
 (ns ouroboros.oeval)
 
 (defn oeval [ form env ]
-  form)
+  (if (symbol? form)
+    (env form)
+    form))
