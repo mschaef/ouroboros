@@ -22,3 +22,11 @@
 
     (testing "Error is sigaled when a sysmbol is missing in the global environment"
       (is (thrown? RuntimeException (oeval 'missing env))))))
+
+(deftest quote-oeval
+  (let [env '{x 3 y 4}]
+    (testing "Quoted symbol evaluates to symbol and not bound value"
+      (is (= (oeval ''x env) 'x)))
+
+    (testing "Quoted symbol missing in global environment evaluates to symbol without error"
+      (is (= (oeval ''missing env) 'missing)))))
