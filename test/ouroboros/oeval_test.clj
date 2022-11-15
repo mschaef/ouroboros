@@ -21,7 +21,8 @@
       (is (= (oeval 'x env) 3)))
 
     (testing "Error is sigaled when a sysmbol is missing in the global environment"
-      (is (thrown? RuntimeException (oeval 'missing env))))))
+      (is (thrown-with-msg? RuntimeException #"Unbound global variable: missing"
+                            (oeval 'missing env))))))
 
 (deftest quote-oeval
   (let [env '{x 3 y 4}]
