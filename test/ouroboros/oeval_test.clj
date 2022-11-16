@@ -21,11 +21,8 @@
   (testing "String evaluates to itself."
     (is (= (oeval "xyzzy" {}) "xyzzy")))
 
-  (testing "Vector evaluates to itself."
-    (is (= (oeval [1 2] {}) [1 2])))
-
-  (testing "Map evaluates to itself."
-    (is (= (oeval {:x 3 :y 4} {}) {:x 3 :y 4}))))
+  (testing "Keyword evaluates to itself."
+    (is (= (oeval :keyword {}) :keyword))))
 
 (deftest symbol-oevel
   (let [env '{x 3 y 4}]
