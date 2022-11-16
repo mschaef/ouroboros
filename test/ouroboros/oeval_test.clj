@@ -30,4 +30,12 @@
       (is (= (oeval ''x env) 'x)))
 
     (testing "Quoted symbol missing in global environment evaluates to symbol without error"
-      (is (= (oeval ''missing env) 'missing)))))
+      (is (= (oeval ''missing env) 'missing)))
+
+    (testing "Quote does not work in the first position of a vector"
+      (is (= (oeval '[quote x] env) '[quote x])))))
+
+(deftest map-apply
+  (let [env '{map {x 3 y 4}}]
+    (testing "A map in function position can be evaluated as a function from key to value"
+      (is (= (oeval '(map 'x) env) 3)))))

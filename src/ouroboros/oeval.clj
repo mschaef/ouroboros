@@ -8,16 +8,27 @@
     (env var)
     (fail "Unbound global variable: " var)))
 
+(defn- oapply [ fun args ]
+  (get fun (first args)))
+
+(declare oeval)
+
+(defn- oeval-list [ form env ]
+  (let [ [ fun-pos & args ] form ]
+    (cond
+      (= fun-pos 'quote)
+      (first args)
+
+      :else
+      (oapply (oeval fun-pos env) (map #(oeval % env) args)))))
+
 (defn oeval [ form env ]
   (cond
     (symbol? form)
     (envlookup form env)
 
     (seq? form)
-    (let [ [ fun-pos arg ] form ]
-      (if (= fun-pos 'quote)
-        arg
-        (fail "Invalid function call: " form)))
+    (oeval-list form env)
 
     :else
     form))
