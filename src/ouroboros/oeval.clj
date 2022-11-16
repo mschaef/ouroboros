@@ -14,13 +14,15 @@
 (declare oeval)
 
 (defn- oeval-list [ form env ]
-  (let [ [ fun-pos & args ] form ]
-    (cond
-      (= fun-pos 'quote)
-      (first args)
+  (if (empty? form)
+    form
+    (let [ [ fun-pos & args ] form ]
+      (cond
+        (= fun-pos 'quote)
+        (first args)
 
-      :else
-      (oapply (oeval fun-pos env) (map #(oeval % env) args)))))
+        :else
+        (oapply (oeval fun-pos env) (map #(oeval % env) args))))))
 
 (defn oeval [ form env ]
   (cond

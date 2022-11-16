@@ -3,6 +3,18 @@
   (:require [clojure.test :refer :all]))
 
 (deftest scalar-oeval
+  (testing "The empty list evaluates to itself."
+    (is (= (oeval '() {}) '())))
+
+  (testing "Nil evaluates to itself."
+    (is (= (oeval nil {}) nil)))
+
+  (testing "True evaluates to itself."
+    (is (= (oeval true {}) true)))
+
+  (testing "False evaluates to itself."
+    (is (= (oeval false {}) false)))
+
   (testing "Number evaluates to itself."
     (is (= (oeval 42 {}) 42)))
 
