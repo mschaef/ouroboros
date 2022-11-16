@@ -27,6 +27,9 @@
     (symbol? form)
     (envlookup form env)
 
+    (vector? form)
+    (vec (map #(oeval % env) form))
+
     (seq? form)
     (oeval-list form env)
 

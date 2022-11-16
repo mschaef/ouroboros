@@ -30,10 +30,18 @@
       (is (= (oeval ''x env) 'x)))
 
     (testing "Quoted symbol missing in global environment evaluates to symbol without error"
-      (is (= (oeval ''missing env) 'missing)))
+      (is (= (oeval ''missing env) 'missing)))))
 
-    (testing "Quote does not work in the first position of a vector"
-      (is (= (oeval '[quote x] env) '[quote x])))))
+(deftest vector-oeval
+  (let [env '{x 3 y 4}]
+    (testing "Empty vectors are evaluated to themselves"
+      (is (= (oeval '[] env) '[])))
+
+    (testing "Vectors with scalars are evaluated to themselves"
+      (is (= (oeval '[11 22] env) '[11 22])))
+
+    (testing "Embedded variables in vectors are evaluated"
+      (is (= (oeval '[x y] env) '[3 4])))))
 
 (deftest map-apply
   (let [env '{map {x 3 y 4}}]
