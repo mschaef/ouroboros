@@ -30,6 +30,10 @@
     (vector? form)
     (vec (map #(oeval % env) form))
 
+    (map? form)
+    (into {} (for [[k v] form]
+               [(oeval k env) (oeval v env)]))
+
     (seq? form)
     (oeval-list form env)
 

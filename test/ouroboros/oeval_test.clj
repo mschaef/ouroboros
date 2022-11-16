@@ -46,6 +46,20 @@
     (testing "Quote works inside vectors"
       (is (= (oeval '['x x 'y y] env) '[x 3 y 4])))))
 
+(deftest map-oeval
+  (let [env '{x 3 y 4}]
+    (testing "Empty maps are evaluated to themselves"
+      (is (= (oeval '{} {})))
+
+    (testing "Maps with scalars are evaluated to themselves"
+      (is (= (oeval '{'a 65 'b 66} env) '{a 65 b 66})))
+
+    (testing "Embedded variables in maps are evaluated"
+      (is (= (oeval '{'a x 'b y} env) '{a 3 b 4})))
+
+    (testing "Quote works inside maps"
+      (is (= (oeval '{'a 'x 'b y} env) '{a x b 4}))))))
+
 (deftest map-apply
   (let [env '{map {x 3 y 4}}]
     (testing "A map in function position can be evaluated as a function from key to value"
