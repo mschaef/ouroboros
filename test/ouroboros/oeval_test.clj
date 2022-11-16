@@ -41,7 +41,10 @@
       (is (= (oeval '[11 22] env) '[11 22])))
 
     (testing "Embedded variables in vectors are evaluated"
-      (is (= (oeval '[x y] env) '[3 4])))))
+      (is (= (oeval '[x y] env) '[3 4])))
+
+    (testing "Quote works inside vectors"
+      (is (= (oeval '['x x 'y y] env) '[x 3 y 4])))))
 
 (deftest map-apply
   (let [env '{map {x 3 y 4}}]
