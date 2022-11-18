@@ -83,3 +83,8 @@
   (let [env '{map {x 3 y 4}}]
     (testing "A keyword in function position can be evaluated as an index into a map"
       (is (= (oeval '('x map) env) 3)))))
+
+(deftest invalid-apply-error
+  (testing "A number cannot be applied."
+    (is (thrown-with-msg? RuntimeException #"Cannot apply: 42"
+                          (oeval '(42) {})))))

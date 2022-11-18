@@ -9,9 +9,15 @@
     (fail "Unbound global variable: " var)))
 
 (defn- oapply [ fun args ]
-  (if (map? fun)
+  (cond
+    (map? fun)
     (get fun (first args))
-    (get (first args) fun)))
+
+    (or (symbol? fun) (keyword? fun))
+    (get (first args) fun)
+
+    :else
+    (fail "Cannot apply: " fun)))
 
 (declare oeval)
 
