@@ -116,3 +116,8 @@
               index :x}]
     (testing "Arguments to function applications are evaluated"
       (is (= (oeval '(m index) env) 3)))))
+
+(deftest recursive-function-application
+  (let [env '{m {:map {:x 3 :y 4} :index :x}}]
+    (testing "All positions of function applications are recursively evaluated"
+      (is (= (oeval '((m :map) (m :index)) env) 3)))))
