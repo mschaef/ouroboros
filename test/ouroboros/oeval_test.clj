@@ -83,7 +83,7 @@
                           (oeval '(false) {}))))
 
   (testing "nil cannot be applied."
-    (is (thrown-with-msg? RuntimeException #"Cannot apply: "
+    (is (thrown-with-msg? RuntimeException #"Cannot apply: nil"
                           (oeval '(nil) {}))))
 
   (testing "The empty list cannot be applied."

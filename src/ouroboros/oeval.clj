@@ -17,7 +17,7 @@
     (get (first args) fun)
 
     :else
-    (fail "Cannot apply: " fun)))
+    (fail "Cannot apply: " (if (nil? fun) "nil" fun))))
 
 (declare oeval)
 
