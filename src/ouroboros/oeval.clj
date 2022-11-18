@@ -10,7 +10,7 @@
 
 (defn- oapply [ fun args ]
   (cond
-    (map? fun)
+    (or (map? fun) (vector? fun))
     (get fun (first args))
 
     (or (symbol? fun) (keyword? fun))

@@ -92,17 +92,22 @@
 
 (deftest map-apply
   (let [env '{map {x 3 y 4}}]
-    (testing "A map in function position can be evaluated as a function from key to value"
+    (testing "A map in function position can be applied as a function from key to value"
       (is (= (oeval '(map 'x) env) 3)))))
+
+(deftest map-apply
+  (let [env '{v [:a :b :c :d]}]
+    (testing "A vector in function position can be applied as a function from index to value"
+      (is (= (oeval '(v 0) env) :a)))))
 
 (deftest keyword-apply
   (let [env '{map {:x 3 :y 4}}]
-    (testing "A keyword in function position can be evaluated as an index into a map"
+    (testing "A keyword in function position can be applied as an index into a map"
       (is (= (oeval '(:x map) env) 3)))))
 
 (deftest symbol-apply
   (let [env '{map {x 3 y 4}}]
-    (testing "A keyword in function position can be evaluated as an index into a map"
+    (testing "A keyword in function position can be applied as an index into a map"
       (is (= (oeval '('x map) env) 3)))))
 
 
