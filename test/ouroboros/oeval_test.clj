@@ -111,3 +111,8 @@
       (is (= (oeval '('x map) env) 3)))))
 
 
+(deftest function-application-var-lookup
+  (let [env '{m {:x 3 :y 4}
+              index :x}]
+    (testing "Arguments to function applications are evaluated"
+      (is (= (oeval '(m index) env) 3)))))
