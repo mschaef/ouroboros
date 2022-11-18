@@ -69,6 +69,27 @@
     (testing "Quote works inside maps"
       (is (= (oeval '{'a 'x 'b y} env) '{a x b 4}))))))
 
+(deftest invalid-apply-error
+  (testing "A number cannot be applied."
+    (is (thrown-with-msg? RuntimeException #"Cannot apply: 42"
+                          (oeval '(42) {}))))
+
+  (testing "The boolean true cannot be applied."
+    (is (thrown-with-msg? RuntimeException #"Cannot apply: true"
+                          (oeval '(true) {}))))
+
+  (testing "The boolean false cannot be applied."
+    (is (thrown-with-msg? RuntimeException #"Cannot apply: false"
+                          (oeval '(false) {}))))
+
+  (testing "nil cannot be applied."
+    (is (thrown-with-msg? RuntimeException #"Cannot apply: "
+                          (oeval '(nil) {}))))
+
+  (testing "The empty list cannot be applied."
+    (is (thrown-with-msg? RuntimeException #"Cannot apply: ()"
+                          (oeval '(nil) {})))))
+
 (deftest map-apply
   (let [env '{map {x 3 y 4}}]
     (testing "A map in function position can be evaluated as a function from key to value"
@@ -84,7 +105,4 @@
     (testing "A keyword in function position can be evaluated as an index into a map"
       (is (= (oeval '('x map) env) 3)))))
 
-(deftest invalid-apply-error
-  (testing "A number cannot be applied."
-    (is (thrown-with-msg? RuntimeException #"Cannot apply: 42"
-                          (oeval '(42) {})))))
+
