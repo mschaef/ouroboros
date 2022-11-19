@@ -25,11 +25,16 @@
   (if (empty? form)
     form
     (let [ [ fun-pos & args ] form ]
-      (cond
-        (= fun-pos 'quote)
+      (case fun-pos
+        quote
         (first args)
 
-        :else
+        if
+        (let [ [ condition-clause then-clause else-clause ] args ]
+          (if (oeval condition-clause env)
+            (oeval then-clause env)
+            (oeval else-clause env)))
+
         (oapply (oeval fun-pos env) (map #(oeval % env) args))))))
 
 (defn oeval [ form env ]

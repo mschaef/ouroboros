@@ -110,7 +110,6 @@
     (testing "A keyword in function position can be applied as an index into a map"
       (is (= (oeval '('x map) env) 3)))))
 
-
 (deftest function-application-var-lookup
   (let [env '{m {:x 3 :y 4}
               index :x}]
@@ -121,3 +120,10 @@
   (let [env '{m {:map {:x 3 :y 4} :index :x}}]
     (testing "All positions of function applications are recursively evaluated"
       (is (= (oeval '((m :map) (m :index)) env) 3)))))
+
+(deftest if-special-form
+  (testing "Then branch returns if conditional is true"
+    (is (= (oeval '(if true 1 2) {}) 1)))
+
+  (testing "Else branch returns if conditional is false"
+    (is (= (oeval '(if false 1 2) {}) 2))))
