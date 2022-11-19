@@ -16,6 +16,9 @@
     (or (symbol? fun) (keyword? fun))
     (get (first args) fun)
 
+    (fn? fun)
+    (apply fun args)
+
     :else
     (fail "Cannot apply: " (if (nil? fun) "nil" fun))))
 

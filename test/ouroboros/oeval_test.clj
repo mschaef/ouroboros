@@ -134,3 +134,7 @@
   (testing "An if returns nil conditional is false and there is no else clause"
     (is (= (oeval '(if false 1) {}) nil))))
 
+(deftest native-fn-apply
+  (let [env {'underlying-+ +}]
+    (testing "A function native to the underlying Clojure can be applied"
+      (is (= (oeval '(underlying-+ 1 2) env) 3)))))
