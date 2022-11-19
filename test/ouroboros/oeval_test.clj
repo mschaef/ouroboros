@@ -122,8 +122,15 @@
       (is (= (oeval '((m :map) (m :index)) env) 3)))))
 
 (deftest if-special-form
-  (testing "Then branch returns if conditional is true"
+  (testing "Then branch in an if returns if conditional is true"
     (is (= (oeval '(if true 1 2) {}) 1)))
 
-  (testing "Else branch returns if conditional is false"
-    (is (= (oeval '(if false 1 2) {}) 2))))
+  (testing "Else branch in an if returns if conditional is false"
+    (is (= (oeval '(if false 1 2) {}) 2)))
+
+  (testing "Then branch in an if returns if conditional is true, even without an else cuase"
+    (is (= (oeval '(if true 1) {}) 1)))
+
+  (testing "An if returns nil conditional is false and there is no else clause"
+    (is (= (oeval '(if false 1) {}) nil))))
+
