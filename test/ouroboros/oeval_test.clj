@@ -121,7 +121,12 @@
     (testing "All positions of function applications are recursively evaluated"
       (is (= (oeval '((m :map) (m :index)) env) 3)))))
 
-(deftest if-special-form
+(deftest native-fn-apply
+  (let [env {'underlying-+ +}]
+    (testing "A function native to the underlying Clojure can be applied"
+      (is (= (oeval '(underlying-+ 1 2) env) 3)))))
+
+(deftest if-special-form-return
   (testing "Then branch in an if returns if conditional is true"
     (is (= (oeval '(if true 1 2) {}) 1)))
 
@@ -134,7 +139,28 @@
   (testing "An if returns nil conditional is false and there is no else clause"
     (is (= (oeval '(if false 1) {}) nil))))
 
-(deftest native-fn-apply
-  (let [env {'underlying-+ +}]
-    (testing "A function native to the underlying Clojure can be applied"
-      (is (= (oeval '(underlying-+ 1 2) env) 3)))))
+(deftest if-special-form-evaluation
+  (let [env {'then-clause (atom false)
+             'else-clause (atom false)
+             'reset! reset!}]
+    (testing "Only the then branch in an if form is evaluated if the condition is true"
+      (oeval '(if true
+                (reset! then-clause true)
+                (reset! else-clause true))
+             env)
+      (is (= [true false]
+             [@(env 'then-clause)
+              @(env 'else-clause)]))))
+
+  (let [env {'then-clause (atom false)
+             'else-clause (atom false)
+             'reset! reset!}]
+    (testing "Only the else branch in an if form is evaluated if the condition is false"
+      (oeval '(if false
+                (reset! then-clause true)
+                (reset! else-clause true))
+             env)
+      (is (= [false true]
+             [@(env 'then-clause)
+              @(env 'else-clause)])))))
+
