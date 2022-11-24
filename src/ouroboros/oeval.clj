@@ -51,7 +51,13 @@
              (rest forms)))))
 
 (defn- oeval-let [ [ bindings & forms ] env ]
-  (oeval-do forms env))
+  (loop [bindings bindings
+         forms forms
+         env env]
+    (if (empty? bindings)
+      (oeval-do forms env)
+      (let [ [ var var-form & remaining-bindings ] bindings ]
+        (recur remaining-bindings forms (assoc env var (oeval var-form env)))))))
 
 (defn- oeval-list [ form env ]
   (if (empty? form)

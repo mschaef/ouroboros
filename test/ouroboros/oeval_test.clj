@@ -255,3 +255,11 @@
                           (order-step 3 33))
                        env)))
       (is (= [1 2 3] (execution-order env))))))
+
+(deftest let-with-bindings
+  (testing "Let creates a single variable binding available within its body"
+    (is (= 42 (oeval '(let [x 42] x) {}))))
+
+  (testing "Let creates multiple variable bindings available within its body"
+    (is (= [42 43 44]
+           (oeval '(let [x 42 y 43 z 44] [x y z]) {})))))
