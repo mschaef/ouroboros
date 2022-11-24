@@ -271,3 +271,8 @@
   (testing "Let requires binding names to be symbols"
     (is (thrown-with-msg? RuntimeException #"Bad let binding name: 42"
                           (oeval '(let [42 42] x) {})))))
+
+(deftest let-with-function-bindings
+  (testing "Let can be used to bind to functions"
+    (is (= 4 (oeval '(let [add +] (add 1 3))
+                    {'+ +})))))
