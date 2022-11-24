@@ -57,6 +57,8 @@
     (if (empty? bindings)
       (oeval-do forms env)
       (let [ [ var var-form & remaining-bindings ] bindings ]
+        (when (not (symbol? var))
+          (fail "Bad let binding name: " var))
         (recur remaining-bindings forms (assoc env var (oeval var-form env)))))))
 
 (defn- oeval-list [ form env ]

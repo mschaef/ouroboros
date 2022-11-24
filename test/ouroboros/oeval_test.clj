@@ -262,4 +262,12 @@
 
   (testing "Let creates multiple variable bindings available within its body"
     (is (= [42 43 44]
-           (oeval '(let [x 42 y 43 z 44] [x y z]) {})))))
+           (oeval '(let [x 42 y 43 z 44] [x y z]) {}))))
+
+  (testing "Let bindings are available within definition forms for subsequent bindings in the same form"
+    (is (= [42 43 44]
+           (oeval '(let [x 42 y (+ x 1) z (+ y 1)] [x y z]) {'+ +}))))
+
+  (testing "Let requires binding names to be symbols"
+    (is (thrown-with-msg? RuntimeException #"Bad let binding name: 42"
+                          (oeval '(let [42 42] x) {})))))
