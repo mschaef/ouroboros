@@ -170,5 +170,7 @@
     (is (nil? (oeval '(do) {}))))
 
   (testing "A single form do block evaluates as that form"
-    (if (= 42 (oeval '(do 42) {}))))
-  )
+    (is (= 42 (oeval '(do 42) {}))))
+
+  (testing "A multiple form do block evaluates as the result of the last formform"
+    (is (= 3 (oeval '(do 1 2 3) {})))))

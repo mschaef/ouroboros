@@ -39,7 +39,11 @@
             (oeval else-clause env)))
 
         do
-        nil
+        (loop [retval nil do-forms args ]
+          (if (empty? do-forms)
+            retval
+            (recur (oeval (first do-forms) env)
+                   (rest do-forms))))
 
         (oapply (oeval fun-pos env) (map #(oeval % env) args))))))
 
