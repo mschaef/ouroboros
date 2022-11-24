@@ -186,3 +186,21 @@
              env)
       (is (= [1 2 3] @(env 's))))))
 
+(deftest and-special-form-evaluation
+  (testing "An empty and form evaluates to true"
+    (is (= true (oeval '(and) {}))))
+
+  (testing "An and form with one true clause evaluates to that clause"
+    (is (= 42 (oeval '(and 42) {}))))
+
+  (testing "An and form with one false clause evaluates to false"
+    (is (false? (oeval '(and false) {}))))
+
+  (testing "A true and form with multiple true clauses evaluates to the last clause"
+    (is (= 3 (oeval '(and 1 2 3) {}))))
+
+  (testing "A false and form with multiple true clauses evaluates to false"
+    (is (false? (oeval '(and false 2 3) {})))
+    (is (false? (oeval '(and 1 false 3) {})))
+    (is (false? (oeval '(and 1 2 false) {})))))
+
