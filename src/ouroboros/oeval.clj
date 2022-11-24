@@ -38,6 +38,9 @@
             (oeval then-clause env)
             (oeval else-clause env)))
 
+        do
+        nil
+
         (oapply (oeval fun-pos env) (map #(oeval % env) args))))))
 
 (defn oeval [ form env ]

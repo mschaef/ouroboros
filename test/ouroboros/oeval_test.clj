@@ -164,3 +164,7 @@
              [@(env 'then-clause)
               @(env 'else-clause)])))))
 
+
+(deftest do-special-form-evaluation
+  (testing "An empty do block evaluates to nil"
+    (is (nil? (oeval '(do) {})))))
