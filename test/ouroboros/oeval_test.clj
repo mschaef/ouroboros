@@ -164,7 +164,6 @@
              [@(env 'then-clause)
               @(env 'else-clause)])))))
 
-
 (deftest do-special-form-evaluation
   (testing "An empty do block evaluates to nil"
     (is (nil? (oeval '(do) {}))))
@@ -173,4 +172,17 @@
     (is (= 42 (oeval '(do 42) {}))))
 
   (testing "A multiple form do block evaluates as the result of the last formform"
-    (is (= 3 (oeval '(do 1 2 3) {})))))
+    (is (= 3 (oeval '(do 1 2 3) {}))))
+
+  (let [env {'s (atom [])
+             'extend! (fn [ a value ]
+                        (swap! a conj value))}]
+
+    (testing "Do block forms are executed in order"
+      (oeval '(do
+                (extend! s 1)
+                (extend! s 2)
+                (extend! s 3))
+             env)
+      (is (= [1 2 3] @(env 's))))))
+
