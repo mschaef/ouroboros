@@ -24,6 +24,18 @@
 
 (declare oeval)
 
+(defn- oeval-if [ [ condition-clause then-clause else-clause ] env ]
+  (if (oeval condition-clause env)
+    (oeval then-clause env)
+    (oeval else-clause env)))
+
+(defn- oeval-do [ forms env ]
+  (loop [retval nil forms forms]
+    (if (empty? forms)
+      retval
+      (recur (oeval (first forms) env)
+             (rest forms)))))
+
 (defn- oeval-list [ form env ]
   (if (empty? form)
     form
@@ -33,17 +45,10 @@
         (first args)
 
         if
-        (let [ [ condition-clause then-clause else-clause ] args ]
-          (if (oeval condition-clause env)
-            (oeval then-clause env)
-            (oeval else-clause env)))
+        (oeval-if args env)
 
         do
-        (loop [retval nil do-forms args ]
-          (if (empty? do-forms)
-            retval
-            (recur (oeval (first do-forms) env)
-                   (rest do-forms))))
+        (oeval-do args env)
 
         (oapply (oeval fun-pos env) (map #(oeval % env) args))))))
 
