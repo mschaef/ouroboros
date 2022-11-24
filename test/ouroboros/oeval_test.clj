@@ -150,29 +150,21 @@
     (is (= (oeval '(if false 1) {}) nil))))
 
 (deftest if-special-form-evaluation
-  (let [env {'then-clause (atom false)
-             'else-clause (atom false)
-             'reset! reset!}]
+  (let [env (order-test-env)]
     (testing "Only the then branch in an if form is evaluated if the condition is true"
       (oeval '(if true
-                (reset! then-clause true)
-                (reset! else-clause true))
+                (order-step :then 0)
+                (order-step :else 0))
              env)
-      (is (= [true false]
-             [@(env 'then-clause)
-              @(env 'else-clause)]))))
+      (is (= [:then] (execution-order env)))))
 
-  (let [env {'then-clause (atom false)
-             'else-clause (atom false)
-             'reset! reset!}]
+  (let [env (order-test-env)]
     (testing "Only the else branch in an if form is evaluated if the condition is false"
       (oeval '(if false
-                (reset! then-clause true)
-                (reset! else-clause true))
+                (order-step :then 0)
+                (order-step :else 0))
              env)
-      (is (= [false true]
-             [@(env 'then-clause)
-              @(env 'else-clause)])))))
+      (is (= [:else] (execution-order env))))))
 
 (deftest do-special-form-evaluation
   (testing "An empty do block evaluates to nil"
@@ -184,16 +176,14 @@
   (testing "A multiple form do block evaluates as the result of the last formform"
     (is (= 3 (oeval '(do 1 2 3) {}))))
 
-  (let [env {'s (atom [])
-             'extend! (fn [ a value ]
-                        (swap! a conj value))}]
+  (let [env (order-test-env)]
     (testing "Do block forms are executed in order"
       (oeval '(do
-                (extend! s 1)
-                (extend! s 2)
-                (extend! s 3))
+                (order-step 1 0)
+                (order-step 2 0)
+                (order-step 3 0))
              env)
-      (is (= [1 2 3] @(env 's))))))
+      (is (= [1 2 3] (execution-order env))))))
 
 (deftest and-special-form-evaluation
   (testing "An empty and form evaluates to true"
