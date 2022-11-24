@@ -237,3 +237,21 @@
              env)
       (is (= [1 2] (execution-order env))))))
 
+(deftest let-without-bindings
+  (testing "An empty let with empty bindings evaluates to nil"
+    (is (nil? (oeval '(let []) {}))))
+
+  (testing "A let with empty bindings and one body form evaluates to its body"
+    (is (= 1 (oeval '(let [] 1) {}))))
+
+  (testing "A let with empty bindings evaluates to its body"
+    (is (= 3 (oeval '(let [] 1 2 3) {}))))
+
+  (let [env (order-test-env)]
+    (testing "Let forms evaluate their bodies in order."
+      (is (= 33 (oeval '(let []
+                          (order-step 1 11)
+                          (order-step 2 22)
+                          (order-step 3 33))
+                       env)))
+      (is (= [1 2 3] (execution-order env))))))

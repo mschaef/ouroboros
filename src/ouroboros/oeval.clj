@@ -50,6 +50,9 @@
       (recur (oeval (first forms) env)
              (rest forms)))))
 
+(defn- oeval-let [ [ bindings & forms ] env ]
+  (oeval-do forms env))
+
 (defn- oeval-list [ form env ]
   (if (empty? form)
     form
@@ -69,6 +72,9 @@
 
         or
         (oeval-or args env)
+
+        let
+        (oeval-let args env)
 
         (oapply (oeval fun-pos env) (map #(oeval % env) args))))))
 
