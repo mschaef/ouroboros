@@ -167,4 +167,8 @@
 
 (deftest do-special-form-evaluation
   (testing "An empty do block evaluates to nil"
-    (is (nil? (oeval '(do) {})))))
+    (is (nil? (oeval '(do) {}))))
+
+  (testing "A single form do block evaluates as that form"
+    (if (= 42 (oeval '(do 42) {}))))
+  )
