@@ -177,7 +177,6 @@
   (let [env {'s (atom [])
              'extend! (fn [ a value ]
                         (swap! a conj value))}]
-
     (testing "Do block forms are executed in order"
       (oeval '(do
                 (extend! s 1)
@@ -203,4 +202,35 @@
     (is (false? (oeval '(and false 2 3) {})))
     (is (false? (oeval '(and 1 false 3) {})))
     (is (false? (oeval '(and 1 2 false) {})))))
+
+(deftest or-special-form-evaluation
+  (testing "An empty or form evaluates to falsee"
+    (is (false? (oeval '(or) {}))))
+
+  (testing "An or form with one true clause evaluates to that clause"
+    (is (= 42 (oeval '(or 42) {}))))
+
+  (testing "An or form with one false clause evaluates to false"
+    (is (false? (oeval '(or false) {}))))
+
+  (testing "A true or form with multiple true clauses evaluates to the first clause"
+    (is (= 1 (oeval '(or 1 2 3) {}))))
+
+  (testing "A true or form with an initial true clause evaluates to that clause"
+    (is (= 1 (oeval '(or 1 false false) {}))))
+
+  (let [env {'s (atom [])
+             'extend! (fn [ a value ]
+                        (swap! a conj value))}]
+    (testing "Or forms short-circuit evaluation"
+      (oeval '(or
+               (do
+                 (extend! s 1)
+                 false)
+               (do
+                 (extend! s 2)
+                 true)
+                (extend! s 3))
+             env)
+      (is (= [1 2] @(env 's))))))
 

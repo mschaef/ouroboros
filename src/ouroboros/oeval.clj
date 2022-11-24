@@ -43,6 +43,13 @@
       (recur (oeval (first forms) env)
              (rest forms)))))
 
+(defn- oeval-or [ forms env ]
+  (loop [retval false forms forms]
+    (if (or (empty? forms) retval)
+      retval
+      (recur (oeval (first forms) env)
+             (rest forms)))))
+
 (defn- oeval-list [ form env ]
   (if (empty? form)
     form
@@ -59,6 +66,9 @@
 
         and
         (oeval-and args env)
+
+        or
+        (oeval-or args env)
 
         (oapply (oeval fun-pos env) (map #(oeval % env) args))))))
 
