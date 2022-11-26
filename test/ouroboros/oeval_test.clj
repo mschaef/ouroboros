@@ -276,3 +276,9 @@
   (testing "Let can be used to bind to functions"
     (is (= 4 (oeval '(let [add +] (add 1 3))
                     {'+ +})))))
+
+(deftest fn-zero-arity
+  (testing "An anonymous function can be created and called"
+    (is (= 42 (oeval '(let [f (fn [] 42)]
+                        (f))
+                     {})))))

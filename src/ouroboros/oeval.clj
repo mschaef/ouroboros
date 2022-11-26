@@ -3,21 +3,31 @@
 (defn- fail [ & args ]
   (throw (RuntimeException. (apply str args))))
 
+(defrecord OFunction [ formals code env ])
+
 (defn- envlookup [ var env ]
   (if (contains? env var)
     (env var)
     (fail "Unbound global variable: " var)))
 
-(defn- oapply [ fun args ]
+(declare oeval-do)
+
+(defn- oapply-ofn [ fun actuals env ]
+  (oeval-do (:code fun) env))
+
+(defn- oapply [ fun actuals env ]
   (cond
+    (instance? OFunction fun)
+    (oapply-ofn fun actuals env)
+
     (or (map? fun) (vector? fun))
-    (get fun (first args))
+    (get fun (first actuals))
 
     (or (symbol? fun) (keyword? fun))
-    (get (first args) fun)
+    (get (first actuals) fun)
 
     (fn? fun)
-    (apply fun args)
+    (apply fun actuals)
 
     :else
     (fail "Cannot apply: " (if (nil? fun) "nil" fun))))
@@ -61,6 +71,9 @@
           (fail "Bad let binding name: " var))
         (recur remaining-bindings forms (assoc env var (oeval var-form env)))))))
 
+(defn- oeval-fn [ [ formals & forms ] env ]
+  (OFunction. formals forms env))
+
 (defn- oeval-list [ form env ]
   (if (empty? form)
     form
@@ -84,7 +97,12 @@
         let
         (oeval-let args env)
 
-        (oapply (oeval fun-pos env) (map #(oeval % env) args))))))
+        fn
+        (oeval-fn args env)
+
+        (oapply (oeval fun-pos env)
+                (map #(oeval % env) args)
+                env)))))
 
 (defn oeval [ form env ]
   (cond
