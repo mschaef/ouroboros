@@ -13,7 +13,9 @@
 (declare oeval-do)
 
 (defn- oapply-ofn [ fun actuals env ]
-  (oeval-do (:code fun) (merge env (zipmap (:formals fun) actuals))))
+  (oeval-do (:code fun)
+            (merge (:env fun)
+                   (zipmap (:formals fun) actuals))))
 
 (defn- oapply [ fun actuals env ]
   (cond

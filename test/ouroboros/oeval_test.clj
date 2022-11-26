@@ -288,3 +288,9 @@
 (deftest fn-2-arity
   (testing "An anonymous function with two arguments can be created and called"
     (is (= 7 (oeval '((fn [ x y ] (+ x y)) 3 4) {'+ +})))))
+
+
+(deftest fn-1-arity-closed
+  (testing "A function is closed over its lexical environment"
+    (is (= 42 (oeval '(((fn [ x ] (fn [] x)) 42))
+                     {})))))
