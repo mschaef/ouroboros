@@ -279,18 +279,12 @@
 
 (deftest fn-zero-arity
   (testing "An anonymous function can be created and called"
-    (is (= 42 (oeval '(let [f (fn [] 42)]
-                        (f))
-                     {})))))
+    (is (= 42 (oeval '((fn [] 42)) {})))))
 
 (deftest fn-1-arity
   (testing "An anonymous function with an argument can be created and called"
-    (is (= 42 (oeval '(let [f (fn [ x ] x)]
-                        (f 42))
-                     {})))))
+    (is (= 42 (oeval '((fn [ x ] x) 42) {})))))
 
 (deftest fn-2-arity
   (testing "An anonymous function with two arguments can be created and called"
-    (is (= 7 (oeval '(let [f (fn [ x y ] (+ x y))]
-                       (f 3 4))
-                    {'+ +})))))
+    (is (= 7 (oeval '((fn [ x y ] (+ x y)) 3 4) {'+ +})))))
