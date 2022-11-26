@@ -282,3 +282,15 @@
     (is (= 42 (oeval '(let [f (fn [] 42)]
                         (f))
                      {})))))
+
+(deftest fn-1-arity
+  (testing "An anonymous function with an argument can be created and called"
+    (is (= 42 (oeval '(let [f (fn [ x ] x)]
+                        (f 42))
+                     {})))))
+
+(deftest fn-2-arity
+  (testing "An anonymous function with two arguments can be created and called"
+    (is (= 7 (oeval '(let [f (fn [ x y ] (+ x y))]
+                       (f 3 4))
+                    {'+ +})))))
