@@ -294,3 +294,18 @@
   (testing "A function is closed over its lexical environment"
     (is (= 42 (oeval '(((fn [ x ] (fn [] x)) 42))
                      {})))))
+
+(deftest lexical-scope
+  (testing "Bindings created by function application are confined to their lexical scope"
+    (is (= 1 (oeval '(let [x 1
+                           fa (fn [] x)
+                           fb (fn [ x ] (fa))]
+                       (fb 2))
+                    {}))))
+
+    (testing "Bindings created by let forms are confined to their lexical scope"
+    (is (= 1 (oeval '(let [x 1
+                           fa (fn [] x)
+                           fb (fn [ ] (let [ x 2 ]  (fa)))]
+                       (fb))
+                     {})))))
