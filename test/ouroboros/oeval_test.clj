@@ -310,7 +310,7 @@
                        (fb))
                      {})))))
 
-(deftest definition-values
+(deftest var-defining-form
   (testing "A definition form returns a definition instance"
     (is (odefinition? (oeval '(def x 2) {}))))
 
@@ -323,3 +323,17 @@
   (testing "A definition form can only defime a symbol"
     (is (thrown-with-msg? RuntimeException #"Cannot define: 42"
                           (oeval '(def 42 x) {})))))
+
+(deftest load-statement
+  (testing "An empty load form does not alter the environment"
+    (is (= {} (oload [] {}))))
+
+  (testing "An load form with a single definition adds that definition"
+    (is (= '{x 4} (oload '[(def x 4)] {}))))
+
+  (testing "An load form with two definitions adds those definitions"
+    (is (= '{x 4 y 3} (oload '[(def x 4) (def y 3)] {}))))
+
+  (testing "An load form can define a function"
+    (let [ env (oload '[(def double (fn [ x ] (+ x x)))] {'+ +}) ]
+      (= 4 (oeval '(double 2) env)))))

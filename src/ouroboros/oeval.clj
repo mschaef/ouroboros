@@ -139,3 +139,12 @@
 
     :else
     form))
+
+(defn oload [ forms env ]
+  (reduce (fn [ env form ]
+            (let [ result (oeval form env) ]
+              (if (odefinition? result)
+                (assoc env (:var result) (:val result))
+                env)))
+          env
+          forms))
