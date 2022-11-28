@@ -3,7 +3,15 @@
 (defn- fail [ & args ]
   (throw (RuntimeException. (apply str args))))
 
+(defrecord ODef [ var val ])
+
+(defn odefinition? [ val ]
+  (instance? ODef val))
+
 (defrecord OFunction [ formals code env ])
+
+(defn ofunction? [ val ]
+  (instance? OFunction val))
 
 (defn- envlookup [ var env ]
   (if (contains? env var)
@@ -19,7 +27,7 @@
 
 (defn- oapply [ fun actuals env ]
   (cond
-    (instance? OFunction fun)
+    (ofunction? fun)
     (oapply-ofn fun actuals env)
 
     (or (map? fun) (vector? fun))
@@ -76,6 +84,11 @@
 (defn- oeval-fn [ [ formals & forms ] env ]
   (OFunction. formals forms env))
 
+(defn- oeval-def [ [ var defn-form ] env ]
+  (when (not (symbol? var))
+    (fail "Cannot define: " var))
+  (ODef. var (oeval defn-form env)))
+
 (defn- oeval-list [ form env ]
   (if (empty? form)
     form
@@ -101,6 +114,9 @@
 
         fn
         (oeval-fn args env)
+
+        def
+        (oeval-def args env)
 
         (oapply (oeval fun-pos env)
                 (map #(oeval % env) args)

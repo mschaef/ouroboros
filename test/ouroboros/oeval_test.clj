@@ -309,3 +309,17 @@
                            fb (fn [ ] (let [ x 2 ]  (fa)))]
                        (fb))
                      {})))))
+
+(deftest definition-values
+  (testing "A definition form returns a definition instance"
+    (is (odefinition? (oeval '(def x 2) {}))))
+
+  (testing "A definition form includes the symbol being defined"
+    (is (= 'x (:var (oeval '(def x 3) {})))))
+
+  (testing "A definition form evaluates its definition"
+    (is (= 4 (:val (oeval '(def x (+ 3 1)) {'+ +})))))
+
+  (testing "A definition form can only defime a symbol"
+    (is (thrown-with-msg? RuntimeException #"Cannot define: 42"
+                          (oeval '(def 42 x) {})))))
