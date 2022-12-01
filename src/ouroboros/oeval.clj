@@ -143,6 +143,10 @@
     :else
     form))
 
+(defn set-macro-flag! [ env sym macro? ]
+  (assoc env :macros
+         ((if macro? conj disj) (get env :macros #{}) sym)))
+
 (defn oload [ forms env ]
   (reduce (fn [ env form ]
             (let [ result (oeval form env) ]

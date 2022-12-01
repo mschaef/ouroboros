@@ -340,6 +340,15 @@
                           #"Macros must be defined to be functions: x"
                           (oeval '(def* x true "not-a-function") {})))))
 
+(deftest set-macro-flag
+  (testing "Setting the macro flag in an empty environment adds to the set of macro symbols"
+    (is (= {:macros #{'x}}
+           (set-macro-flag! {} 'x true))))
+
+  (testing "Clearing the macro flag in an empty environment removes from the set of macro symbols"
+    (is (= {:macros #{}}
+           (set-macro-flag! {:macros #{'x}} 'x false)))))
+
 (deftest load-statement
   (testing "An empty load form does not alter the environment"
     (is (= {} (oload [] {}))))
