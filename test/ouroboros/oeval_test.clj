@@ -354,11 +354,19 @@
     (is (= {} (oload [] {}))))
 
   (testing "An load form with a single definition adds that definition"
-    (is (= '{x 4} (oload '[(def* x false 4)] {}))))
+    (is (= '{x 4 :macros #{}} (oload '[(def* x false 4)] {}))))
 
   (testing "An load form with two definitions adds those definitions"
-    (is (= '{x 4 y 3} (oload '[(def* x false 4) (def* y false 3)] {}))))
+    (is (= '{x 4 y 3 :macros #{}} (oload '[(def* x false 4) (def* y false 3)] {}))))
 
   (testing "An load form can define a function"
     (let [ env (oload '[(def* double false (fn [ x ] (+ x x)))] {'+ +}) ]
-      (= 4 (oeval '(double 2) env)))))
+      (= 4 (oeval '(double 2) env))))
+
+  (testing "An load form with a standard definition does not set the macro flag"
+    (is (not (macro-defn? (oload '[(def* x false 4)] {})
+                          'x))))
+
+  (testing "An load form with a macro definition sets the macro flag"
+    (is (macro-defn? (oload '[(def* x true (fn [ x ] (+ x x)))] {})
+                          'x))))

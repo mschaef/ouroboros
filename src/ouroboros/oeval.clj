@@ -147,11 +147,16 @@
   (assoc env :macros
          ((if macro? conj disj) (get env :macros #{}) sym)))
 
+(defn macro-defn? [ env sym ]
+  ((get env :macros #{}) sym))
+
 (defn oload [ forms env ]
   (reduce (fn [ env form ]
             (let [ result (oeval form env) ]
               (if (odefinition? result)
-                (assoc env (:var result) (:val result))
+                (-> env
+                    (assoc (:var result) (:val result))
+                    (set-macro-flag! (:var result) (:macro? result)))
                 env)))
           env
           forms))
