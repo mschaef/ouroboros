@@ -312,28 +312,44 @@
 
 (deftest var-defining-form
   (testing "A definition form returns a definition instance"
-    (is (odefinition? (oeval '(def x 2) {}))))
+    (is (odefinition? (oeval '(def* x false 2) {}))))
 
   (testing "A definition form includes the symbol being defined"
-    (is (= 'x (:var (oeval '(def x 3) {})))))
+    (is (= 'x (:var (oeval '(def* x false 3) {})))))
 
   (testing "A definition form evaluates its definition"
-    (is (= 4 (:val (oeval '(def x (+ 3 1)) {'+ +})))))
+    (is (= 4 (:val (oeval '(def* x false (+ 3 1)) {'+ +})))))
+
+  (testing "A definition form defaults the macro flag to false"
+    (is (= false (:macro? (oeval '(def* x false (+ 3 1)) {'+ +})))))
 
   (testing "A definition form can only defime a symbol"
     (is (thrown-with-msg? RuntimeException #"Cannot define: 42"
-                          (oeval '(def 42 x) {})))))
+                          (oeval '(def* 42 false x) {})))))
+
+(deftest macro-defining-form
+  (testing "A definition form defaults the macro flag to false"
+    (is (= true (:macro? (oeval '(def* x true (fn [] 3)) {})))))
+
+  (testing "A macro definition form can only defime a symbol"
+    (is (thrown-with-msg? RuntimeException #"Cannot define: 42"
+                          (oeval '(def* 42 true (fn [] x)) {}))))
+
+  (testing "A macro definition must be a function"
+    (is (thrown-with-msg? RuntimeException
+                          #"Macros must be defined to be functions: x"
+                          (oeval '(def* x true "not-a-function") {})))))
 
 (deftest load-statement
   (testing "An empty load form does not alter the environment"
     (is (= {} (oload [] {}))))
 
   (testing "An load form with a single definition adds that definition"
-    (is (= '{x 4} (oload '[(def x 4)] {}))))
+    (is (= '{x 4} (oload '[(def* x false 4)] {}))))
 
   (testing "An load form with two definitions adds those definitions"
-    (is (= '{x 4 y 3} (oload '[(def x 4) (def y 3)] {}))))
+    (is (= '{x 4 y 3} (oload '[(def* x false 4) (def* y false 3)] {}))))
 
   (testing "An load form can define a function"
-    (let [ env (oload '[(def double (fn [ x ] (+ x x)))] {'+ +}) ]
+    (let [ env (oload '[(def* double false (fn [ x ] (+ x x)))] {'+ +}) ]
       (= 4 (oeval '(double 2) env)))))

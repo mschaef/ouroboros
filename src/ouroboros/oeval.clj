@@ -3,7 +3,7 @@
 (defn- fail [ & args ]
   (throw (RuntimeException. (apply str args))))
 
-(defrecord ODef [ var val ])
+(defrecord ODef [ var val macro? ])
 
 (defn odefinition? [ val ]
   (instance? ODef val))
@@ -84,10 +84,13 @@
 (defn- oeval-fn [ [ formals & forms ] env ]
   (OFunction. formals forms env))
 
-(defn- oeval-def [ [ var defn-form ] env ]
+(defn- oeval-def* [ [ var macro? defn-form ] env ]
   (when (not (symbol? var))
     (fail "Cannot define: " var))
-  (ODef. var (oeval defn-form env)))
+  (let [definition (oeval defn-form env)]
+    (when (and macro? (not (ofunction? definition)))
+      (fail "Macros must be defined to be functions: " var))
+    (ODef. var definition macro?)))
 
 (defn- oeval-list [ form env ]
   (if (empty? form)
@@ -115,8 +118,8 @@
         fn
         (oeval-fn args env)
 
-        def
-        (oeval-def args env)
+        def*
+        (oeval-def* args env)
 
         (oapply (oeval fun-pos env)
                 (map #(oeval % env) args)
