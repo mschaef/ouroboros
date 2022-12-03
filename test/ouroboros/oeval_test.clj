@@ -12,6 +12,23 @@
 (defn execution-order [ env ]
   @(env 'current-order-state))
 
+
+(deftest oimport-environment
+  (testing "An empty oimport produces an empty environment"
+    (is (= {} (oimport-syms))))
+
+  (testing "An oimport with a symbol produces an environemnt with that symbol bound to the current definition"
+    (is (= {'+ +} (oimport-syms +))))
+
+  (testing "An oimport with n symbols produces an environemnt with those symbols bound"
+    (is (= {'+ + '* * '- -} (oimport-syms + * -))))
+
+  (testing "oimport cannot be used for anything other than symbols"
+    (is (thrown-with-msg? RuntimeException #"Cannot import non-symbol: 42"
+                          (oimport-syms-form [42])))))
+
+(def math-env (oimport-syms +))
+
 (deftest scalar-oeval
   (testing "The empty list evaluates to itself."
     (is (= (oeval '() {}) '())))
@@ -266,7 +283,7 @@
 
   (testing "Let bindings are available within definition forms for subsequent bindings in the same form"
     (is (= [42 43 44]
-           (oeval '(let [x 42 y (+ x 1) z (+ y 1)] [x y z]) {'+ +}))))
+           (oeval '(let [x 42 y (+ x 1) z (+ y 1)] [x y z]) math-env))))
 
   (testing "Let requires binding names to be symbols"
     (is (thrown-with-msg? RuntimeException #"Bad let binding name: 42"
@@ -275,7 +292,7 @@
 (deftest let-with-function-bindings
   (testing "Let can be used to bind to functions"
     (is (= 4 (oeval '(let [add +] (add 1 3))
-                    {'+ +})))))
+                    math-env)))))
 
 (deftest fn-zero-arity
   (testing "An anonymous function can be created and called"
@@ -287,7 +304,7 @@
 
 (deftest fn-2-arity
   (testing "An anonymous function with two arguments can be created and called"
-    (is (= 7 (oeval '((fn [ x y ] (+ x y)) 3 4) {'+ +})))))
+    (is (= 7 (oeval '((fn [ x y ] (+ x y)) 3 4) math-env)))))
 
 
 (deftest fn-1-arity-closed
@@ -318,10 +335,10 @@
     (is (= 'x (:var (oeval '(def* x false 3) {})))))
 
   (testing "A definition form evaluates its definition"
-    (is (= 4 (:val (oeval '(def* x false (+ 3 1)) {'+ +})))))
+    (is (= 4 (:val (oeval '(def* x false (+ 3 1)) math-env)))))
 
   (testing "A definition form defaults the macro flag to false"
-    (is (= false (:macro? (oeval '(def* x false (+ 3 1)) {'+ +})))))
+    (is (= false (:macro? (oeval '(def* x false (+ 3 1)) math-env)))))
 
   (testing "A definition form can only defime a symbol"
     (is (thrown-with-msg? RuntimeException #"Cannot define: 42"
@@ -360,7 +377,7 @@
     (is (= '{x 4 y 3 :macros #{}} (oload '[(def* x false 4) (def* y false 3)] {}))))
 
   (testing "An load form can define a function"
-    (let [ env (oload '[(def* double false (fn [ x ] (+ x x)))] {'+ +}) ]
+    (let [ env (oload '[(def* double false (fn [ x ] (+ x x)))] math-env) ]
       (= 4 (oeval '(double 2) env))))
 
   (testing "An load form with a standard definition does not set the macro flag"
@@ -370,18 +387,3 @@
   (testing "An load form with a macro definition sets the macro flag"
     (is (macro-defn? (oload '[(def* x true (fn [ x ] (+ x x)))] {})
                           'x))))
-
-(deftest oimport-environment
-  (testing "An empty oimport produces an empty environment"
-    (is (= {} (oimport-syms))))
-
-  (testing "An oimport with a symbol produces an environemnt with that symbol bound to the current definition"
-    (is (= {'+ +} (oimport-syms +))))
-
-  (testing "An oimport with n symbols produces an environemnt with those symbols bound"
-    (is (= {'+ + '* * '- -} (oimport-syms + * -))))
-
-  (testing "oimport cannot be used for anything other than symbols"
-    (is (thrown-with-msg? RuntimeException #"Cannot import non-symbol: 42"
-                          (oimport-syms-form [42])))))
-

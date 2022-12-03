@@ -18,6 +18,17 @@
     (env var)
     (fail "Unbound global variable: " var)))
 
+(defn oimport-syms-form [ syms ]
+  (into {}
+        (map (fn [ sym ]
+               (when (not (symbol? sym))
+                 (fail "Cannot import non-symbol: " sym))
+               `[ '~sym ~sym])
+             syms)))
+
+(defmacro oimport-syms [ & syms ]
+  (oimport-syms-form syms))
+
 (declare oeval-do)
 
 (defn- oapply-ofn [ fun actuals env ]
@@ -160,16 +171,4 @@
                 env)))
           env
           forms))
-
-(defn oimport-syms-form [ syms ]
-  (into {}
-        (map (fn [ sym ]
-               (when (not (symbol? sym))
-                 (fail "Cannot import non-symbol: " sym))
-               `[ '~sym ~sym])
-             syms)))
-
-(defmacro oimport-syms [ & syms ]
-  (oimport-syms-form syms))
-
 
