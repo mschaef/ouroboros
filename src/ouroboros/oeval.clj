@@ -161,10 +161,15 @@
           env
           forms))
 
-(defmacro oimport-syms [ & syms ]
+(defn oimport-syms-form [ syms ]
   (into {}
         (map (fn [ sym ]
+               (when (not (symbol? sym))
+                 (fail "Cannot import non-symbol: " sym))
                `[ '~sym ~sym])
              syms)))
+
+(defmacro oimport-syms [ & syms ]
+  (oimport-syms-form syms))
 
 

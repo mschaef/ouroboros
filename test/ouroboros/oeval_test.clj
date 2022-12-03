@@ -379,5 +379,9 @@
     (is (= {'+ +} (oimport-syms +))))
 
   (testing "An oimport with n symbols produces an environemnt with those symbols bound"
-    (is (= {'+ + '* * '- -} (oimport-syms + * -)))))
+    (is (= {'+ + '* * '- -} (oimport-syms + * -))))
+
+  (testing "oimport cannot be used for anything other than symbols"
+    (is (thrown-with-msg? RuntimeException #"Cannot import non-symbol: 42"
+                          (oimport-syms-form [42])))))
 
