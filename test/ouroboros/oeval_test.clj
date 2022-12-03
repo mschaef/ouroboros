@@ -370,3 +370,14 @@
   (testing "An load form with a macro definition sets the macro flag"
     (is (macro-defn? (oload '[(def* x true (fn [ x ] (+ x x)))] {})
                           'x))))
+
+(deftest oimport-environment
+  (testing "An empty oimport produces an empty environment"
+    (is (= {} (oimport-syms))))
+
+  (testing "An oimport with a symbol produces an environemnt with that symbol bound to the current definition"
+    (is (= {'+ +} (oimport-syms +))))
+
+  (testing "An oimport with n symbols produces an environemnt with those symbols bound"
+    (is (= {'+ + '* * '- -} (oimport-syms + * -)))))
+

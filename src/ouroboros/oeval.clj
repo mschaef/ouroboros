@@ -160,3 +160,11 @@
                 env)))
           env
           forms))
+
+(defmacro oimport-syms [ & syms ]
+  (into {}
+        (map (fn [ sym ]
+               `[ '~sym ~sym])
+             syms)))
+
+
