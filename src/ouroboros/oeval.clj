@@ -108,29 +108,14 @@
     form
     (let [ [ fun-pos & args ] form ]
       (case fun-pos
-        quote
-        (first args)
-
-        if
-        (oeval-if args env)
-
-        do
-        (oeval-do args env)
-
-        and
-        (oeval-and args env)
-
-        or
-        (oeval-or args env)
-
-        let
-        (oeval-let args env)
-
-        fn
-        (oeval-fn args env)
-
-        def*
-        (oeval-def* args env)
+        quote (first args)
+        if    (oeval-if args env)
+        do    (oeval-do args env)
+        and   (oeval-and args env)
+        or    (oeval-or args env)
+        let   (oeval-let args env)
+        fn    (oeval-fn args env)
+        def*  (oeval-def* args env)
 
         (oapply (oeval fun-pos env)
                 (map #(oeval % env) args)
