@@ -153,6 +153,20 @@
     (testing "A function native to the underlying Clojure can be applied"
       (is (= (oeval '(underlying-+ 1 2) env) 3)))))
 
+(deftest fn-apply
+  (let [env (oload '[(def* add (fn [ arg-0 arg-1 ] (+ arg-0 arg-1)))]
+                   math-env)]
+    (testing "An interpreted function can be applied"
+      (is (= 42 (oeval '(add 2 40) env))))
+
+    (testing "An interpreted function called with insufficient arguments will throw an error"
+      (is (thrown-with-msg? RuntimeException #"Incorrect number of arguments: 1"
+                            (oeval '(add 2) env))))
+
+    (testing "An interpreted function called with too many arguments will throw an error"
+      (is (thrown-with-msg? RuntimeException #"Incorrect number of arguments: 3"
+                            (oeval '(add 1 2 3) env))))))
+
 (deftest if-special-form-return
   (testing "Then branch in an if returns if conditional is true"
     (is (= (oeval '(if true 1 2) {}) 1)))
@@ -391,7 +405,7 @@
 (deftest macro-expansion
   (let [ env-w-macro (oload '[(defm* add (fn [ arg-0 arg-1 ]
                                              (list '+ arg-0 arg-1)))]
-                            math-env)] 
+                            math-env)]
     (testing "A macro is expanded during evaluation and the result of the macro evaluated"
       (is (= 5 (oeval '(add 2 3) env-w-macro))))
 
