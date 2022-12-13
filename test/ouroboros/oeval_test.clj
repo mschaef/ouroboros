@@ -329,33 +329,33 @@
 
 (deftest var-defining-form
   (testing "A definition form returns a definition instance"
-    (is (odefinition? (oeval '(def* x false 2) {}))))
+    (is (odefinition? (oeval '(def* x 2) {}))))
 
   (testing "A definition form includes the symbol being defined"
-    (is (= 'x (:var (oeval '(def* x false 3) {})))))
+    (is (= 'x (:var (oeval '(def* x 3) {})))))
 
   (testing "A definition form evaluates its definition"
-    (is (= 4 (:val (oeval '(def* x false (+ 3 1)) math-env)))))
+    (is (= 4 (:val (oeval '(def* x (+ 3 1)) math-env)))))
 
   (testing "A definition form defaults the macro flag to false"
-    (is (= false (:macro? (oeval '(def* x false (+ 3 1)) math-env)))))
+    (is (= false (:macro? (oeval '(def* x (+ 3 1)) math-env)))))
 
   (testing "A definition form can only defime a symbol"
     (is (thrown-with-msg? RuntimeException #"Cannot define: 42"
-                          (oeval '(def* 42 false x) {})))))
+                          (oeval '(def* 42 x) {})))))
 
 (deftest macro-defining-form
   (testing "A definition form defaults the macro flag to false"
-    (is (= true (:macro? (oeval '(def* x true (fn [] 3)) {})))))
+    (is (= true (:macro? (oeval '(defm* x (fn [] 3)) {})))))
 
   (testing "A macro definition form can only defime a symbol"
     (is (thrown-with-msg? RuntimeException #"Cannot define: 42"
-                          (oeval '(def* 42 true (fn [] x)) {}))))
+                          (oeval '(defm* 42 (fn [] x)) {}))))
 
   (testing "A macro definition must be a function"
     (is (thrown-with-msg? RuntimeException
                           #"Macros must be defined to be functions: x"
-                          (oeval '(def* x true "not-a-function") {})))))
+                          (oeval '(defm* x "not-a-function") {})))))
 
 (deftest set-macro-flag
   (testing "Setting the macro flag in an empty environment adds to the set of macro symbols"
@@ -371,19 +371,19 @@
     (is (= {} (oload [] {}))))
 
   (testing "An load form with a single definition adds that definition"
-    (is (= '{x 4 :macros #{}} (oload '[(def* x false 4)] {}))))
+    (is (= '{x 4 :macros #{}} (oload '[(def* x 4)] {}))))
 
   (testing "An load form with two definitions adds those definitions"
-    (is (= '{x 4 y 3 :macros #{}} (oload '[(def* x false 4) (def* y false 3)] {}))))
+    (is (= '{x 4 y 3 :macros #{}} (oload '[(def* x 4) (def* y 3)] {}))))
 
   (testing "An load form can define a function"
-    (let [ env (oload '[(def* double false (fn [ x ] (+ x x)))] math-env) ]
+    (let [ env (oload '[(def* double (fn [ x ] (+ x x)))] math-env) ]
       (= 4 (oeval '(double 2) env))))
 
   (testing "An load form with a standard definition does not set the macro flag"
-    (is (not (macro-defn? (oload '[(def* x false 4)] {})
+    (is (not (macro-defn? (oload '[(def* x 4)] {})
                           'x))))
 
   (testing "An load form with a macro definition sets the macro flag"
-    (is (macro-defn? (oload '[(def* x true (fn [ x ] (+ x x)))] {})
+    (is (macro-defn? (oload '[(defm* x (fn [ x ] (+ x x)))] {})
                           'x))))

@@ -18,6 +18,23 @@
     (env var)
     (fail "Unbound global variable: " var)))
 
+(defn set-macro-flag! [ env sym macro? ]
+  (assoc env :macros
+         ((if macro? conj disj) (get env :macros #{}) sym)))
+
+(defn extend-env! [ env var val ]
+  (-> env
+      (assoc var val)
+      (set-macro-flag! var false)))
+
+(defn extend-env-macro! [ env var val ]
+  (-> env
+      (assoc var val)
+      (set-macro-flag! var true)))
+
+(defn macro-defn? [ env sym ]
+  ((get env :macros #{}) sym))
+
 (defn oimport-syms-form [ syms ]
   (into {}
         (map (fn [ sym ]
@@ -95,13 +112,19 @@
 (defn- oeval-fn [ [ formals & forms ] env ]
   (OFunction. formals forms env))
 
-(defn- oeval-def* [ [ var macro? defn-form ] env ]
+(defn- oeval-def* [ [ var defn-form ] env ]
   (when (not (symbol? var))
     (fail "Cannot define: " var))
   (let [definition (oeval defn-form env)]
-    (when (and macro? (not (ofunction? definition)))
+    (ODef. var definition false)))
+
+(defn- oeval-defm* [ [ var defn-form ] env ]
+  (when (not (symbol? var))
+    (fail "Cannot define: " var))
+  (let [definition (oeval defn-form env)]
+    (when (not (ofunction? definition))
       (fail "Macros must be defined to be functions: " var))
-    (ODef. var definition macro?)))
+    (ODef. var definition true)))
 
 (defn- oeval-list [ form env ]
   (if (empty? form)
@@ -116,6 +139,7 @@
         let   (oeval-let args env)
         fn    (oeval-fn args env)
         def*  (oeval-def* args env)
+        defm* (oeval-defm* args env)
 
         (oapply (oeval fun-pos env)
                 (map #(oeval % env) args)
@@ -139,21 +163,13 @@
     :else
     form))
 
-(defn set-macro-flag! [ env sym macro? ]
-  (assoc env :macros
-         ((if macro? conj disj) (get env :macros #{}) sym)))
-
-(defn macro-defn? [ env sym ]
-  ((get env :macros #{}) sym))
-
 (defn oload [ forms env ]
   (reduce (fn [ env form ]
             (let [ result (oeval form env) ]
               (if (odefinition? result)
-                (-> env
-                    (assoc (:var result) (:val result))
-                    (set-macro-flag! (:var result) (:macro? result)))
+                (if (:macro? result)
+                  (extend-env-macro! env (:var result) (:val result))
+                  (extend-env! env (:var result) (:val result)))
                 env)))
           env
           forms))
-
