@@ -27,7 +27,7 @@
     (is (thrown-with-msg? RuntimeException #"Cannot import non-symbol: 42"
                           (oimport-syms-form [42])))))
 
-(def math-env (oimport-syms +))
+(def math-env (oimport-syms + list))
 
 (deftest scalar-oeval
   (testing "The empty list evaluates to itself."
@@ -387,3 +387,10 @@
   (testing "An load form with a macro definition sets the macro flag"
     (is (macro-defn? (oload '[(defm* x (fn [ x ] (+ x x)))] {})
                           'x))))
+
+(deftest macro-expansion
+  (testing "A macro is expanded during evaluation and the result of the macro evaluated"
+    (let [ env-w-macro (oload '[(defm* add (fn [ arg-0 arg-1 ]
+                                             (list '+ arg-0 arg-1)))]
+                              math-env)]
+      (is (= 5 (oeval '(add 2 3) env-w-macro))))))

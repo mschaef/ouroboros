@@ -18,6 +18,11 @@
     (env var)
     (fail "Unbound global variable: " var)))
 
+(defn- macrolookup [ var env ]
+  (and (contains? env var)
+       ((or (:macros env) #{}) var)
+       (env var))  )
+
 (defn set-macro-flag! [ env sym macro? ]
   (assoc env :macros
          ((if macro? conj disj) (get env :macros #{}) sym)))
@@ -130,20 +135,22 @@
   (if (empty? form)
     form
     (let [ [ fun-pos & args ] form ]
-      (case fun-pos
-        quote (first args)
-        if    (oeval-if args env)
-        do    (oeval-do args env)
-        and   (oeval-and args env)
-        or    (oeval-or args env)
-        let   (oeval-let args env)
-        fn    (oeval-fn args env)
-        def*  (oeval-def* args env)
-        defm* (oeval-defm* args env)
+      (if-let [ macro (macrolookup fun-pos env)]
+        (oeval (oapply macro (rest form) env) env)
+        (case fun-pos
+          quote (first args)
+          if    (oeval-if args env)
+          do    (oeval-do args env)
+          and   (oeval-and args env)
+          or    (oeval-or args env)
+          let   (oeval-let args env)
+          fn    (oeval-fn args env)
+          def*  (oeval-def* args env)
+          defm* (oeval-defm* args env)
 
-        (oapply (oeval fun-pos env)
-                (map #(oeval % env) args)
-                env)))))
+          (oapply (oeval fun-pos env)
+                  (map #(oeval % env) args)
+                  env))))))
 
 (defn oeval [ form env ]
   (cond
