@@ -360,51 +360,38 @@
 
 (deftest macro-defining-form
   (testing "A definition form defaults the macro flag to false"
-    (is (= true (:macro? (oeval '(defm* x (fn [] 3)) {})))))
-
-  (testing "A macro definition form can only defime a symbol"
-    (is (thrown-with-msg? RuntimeException #"Cannot define: 42"
-                          (oeval '(defm* 42 (fn [] x)) {}))))
+    (is (omacro? (oeval '(macro* (fn [] 3)) {}))))
 
   (testing "A macro definition must be a function"
     (is (thrown-with-msg? RuntimeException
-                          #"Macros must be defined to be functions: x"
-                          (oeval '(defm* x "not-a-function") {})))))
-
-(deftest set-macro-flag
-  (testing "Setting the macro flag in an empty environment adds to the set of macro symbols"
-    (is (= {:macros #{'x}}
-           (set-macro-flag! {} 'x true))))
-
-  (testing "Clearing the macro flag in an empty environment removes from the set of macro symbols"
-    (is (= {:macros #{}}
-           (set-macro-flag! {:macros #{'x}} 'x false)))))
+                          #"Macros must be functions"
+                          (oeval '(macro* "not-a-function") {})))))
 
 (deftest load-statement
   (testing "An empty load form does not alter the environment"
     (is (= {} (oload [] {}))))
 
   (testing "An load form with a single definition adds that definition"
-    (is (= '{x 4 :macros #{}} (oload '[(def* x 4)] {}))))
+    (is (= '{x 4} (oload '[(def* x 4)] {}))))
 
   (testing "An load form with two definitions adds those definitions"
-    (is (= '{x 4 y 3 :macros #{}} (oload '[(def* x 4) (def* y 3)] {}))))
+    (is (= '{x 4 y 3} (oload '[(def* x 4) (def* y 3)] {}))))
 
   (testing "An load form can define a function"
     (let [ env (oload '[(def* double (fn [ x ] (+ x x)))] math-env) ]
       (= 4 (oeval '(double 2) env))))
 
-  (testing "An load form with a standard definition does not set the macro flag"
-    (is (not (macro-defn? (oload '[(def* x 4)] {})
-                          'x))))
+  (testing "An load form with a standard definition does not define a macro"
+    (is (not (macrolookup 'x
+                          (oload '[(def* x 4)] {})))))
 
-  (testing "An load form with a macro definition sets the macro flag"
-    (is (macro-defn? (oload '[(defm* x (fn [ x ] (+ x x)))] {})
-                          'x))))
+  (testing "An load form with a macro definition defines a macro"
+    (is (macrolookup 'x
+                     (oload '[(def* x (macro* (fn [ x ] (+ x x))))] {})))))
 
 (deftest macro-expansion
-  (let [ env-w-macro (oload '[(defm* add (fn [ arg-0 arg-1 ]
-                                             (list '+ arg-0 arg-1)))]
+  (let [ env-w-macro (oload '[(def* add (macro* (fn [ arg-0 arg-1 ]
+                                                  (list '+ arg-0 arg-1))))]
                             math-env)]
     (testing "A macro is expanded during evaluation and the result of the macro evaluated"
       (is (= 5 (oeval '(add 2 3) env-w-macro))))

@@ -13,32 +13,24 @@
 (defn ofunction? [ val ]
   (instance? OFunction val))
 
+(defrecord OMacro [ val ])
+
+(defn omacro? [ val ]
+  (instance? OMacro val))
+
 (defn- envlookup [ var env ]
   (if (contains? env var)
     (env var)
     (fail "Unbound global variable: " var)))
 
-(defn- macrolookup [ var env ]
+(defn macrolookup [ var env ]
   (and (contains? env var)
-       ((or (:macros env) #{}) var)
-       (env var))  )
-
-(defn set-macro-flag! [ env sym macro? ]
-  (assoc env :macros
-         ((if macro? conj disj) (get env :macros #{}) sym)))
+       (let [ val (env var) ]
+         (and (omacro? val)
+              (.val val)))))
 
 (defn extend-env! [ env var val ]
-  (-> env
-      (assoc var val)
-      (set-macro-flag! var false)))
-
-(defn extend-env-macro! [ env var val ]
-  (-> env
-      (assoc var val)
-      (set-macro-flag! var true)))
-
-(defn macro-defn? [ env sym ]
-  ((get env :macros #{}) sym))
+  (assoc env var val))
 
 (defn oimport-syms-form [ syms ]
   (into {}
@@ -125,13 +117,11 @@
   (let [definition (oeval defn-form env)]
     (ODef. var definition false)))
 
-(defn- oeval-defm* [ [ var defn-form ] env ]
-  (when (not (symbol? var))
-    (fail "Cannot define: " var))
+(defn- oeval-macro* [ [ defn-form ] env ]
   (let [definition (oeval defn-form env)]
     (when (not (ofunction? definition))
-      (fail "Macros must be defined to be functions: " var))
-    (ODef. var definition true)))
+      (fail "Macros must be functions: " definition))
+    (OMacro. definition)))
 
 (defn- oeval-list [ form env ]
   (if (empty? form)
@@ -140,15 +130,15 @@
       (if-let [ macro (macrolookup fun-pos env)]
         (oeval (oapply macro (rest form) env) env)
         (case fun-pos
-          quote (first args)
-          if    (oeval-if args env)
-          do    (oeval-do args env)
-          and   (oeval-and args env)
-          or    (oeval-or args env)
-          let   (oeval-let args env)
-          fn    (oeval-fn args env)
-          def*  (oeval-def* args env)
-          defm* (oeval-defm* args env)
+          quote  (first args)
+          if     (oeval-if args env)
+          do     (oeval-do args env)
+          and    (oeval-and args env)
+          or     (oeval-or args env)
+          let    (oeval-let args env)
+          fn     (oeval-fn args env)
+          def*   (oeval-def* args env)
+          macro* (oeval-macro* args env)
 
           (oapply (oeval fun-pos env)
                   (map #(oeval % env) args)
@@ -176,9 +166,7 @@
   (reduce (fn [ env form ]
             (let [ result (oeval form env) ]
               (if (odefinition? result)
-                (if (:macro? result)
-                  (extend-env-macro! env (:var result) (:val result))
-                  (extend-env! env (:var result) (:val result)))
+                (extend-env! env (:var result) (:val result))
                 env)))
           env
           forms))
