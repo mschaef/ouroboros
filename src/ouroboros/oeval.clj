@@ -46,9 +46,20 @@
 (declare oeval-do)
 
 (defn- bind-formal-arguments [ formals actuals ]
-  (when (not (= (count actuals) (count formals)))
-    (fail "Incorrect number of arguments: " (count actuals)))
-  (zipmap formals actuals))
+  (loop [env {}
+         f formals
+         a actuals]
+    (cond
+      (and (empty? f) (empty? a))
+      env
+
+      (or (empty? f) (empty? a))
+      (fail "Incorrect number of arguments: " (count actuals))
+
+      :else
+      (recur (assoc env (first f) (first a))
+             (rest f)
+             (rest a)))))
 
 (defn- oapply-ofn [ fun actuals env ]
   (oeval-do (:code fun)

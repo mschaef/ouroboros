@@ -318,7 +318,13 @@
 
 (deftest fn-2-arity
   (testing "An anonymous function with two arguments can be created and called"
-    (is (= 7 (oeval '((fn [ x y ] (+ x y)) 3 4) math-env)))))
+    (is (= 7 (oeval '((fn [ x y ] (+ x y)) 3 4) math-env))))
+
+  (testing "An anonymous function with two arguments properly returns its first argument"
+    (is (= 3 (oeval '((fn [ x y ] x) 3 4) math-env))))
+
+  (testing "An anonymous function with two arguments properly returns its first argument"
+    (is (= 4 (oeval '((fn [ x y ] y) 3 4) math-env)))))
 
 
 (deftest fn-1-arity-closed
