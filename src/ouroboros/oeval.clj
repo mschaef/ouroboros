@@ -166,6 +166,7 @@
                   env))))))
 
 (defn oeval [ form env ]
+  ;; this should fail if env is not a map
   (cond
     (symbol? form)
     (envlookup form env)
@@ -184,6 +185,7 @@
     form))
 
 (defn oload [ forms env ]
+  ;; this should fail if env is not a map
   (reduce (fn [ env form ]
             (let [ result (oeval form env) ]
               (if (odefinition? result)
