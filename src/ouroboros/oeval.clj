@@ -45,12 +45,15 @@
 
 (declare oeval-do)
 
-(defn- oapply-ofn [ fun actuals env ]
-  (when (not (= (count actuals) (count (:formals fun))))
+(defn- bind-formal-arguments [ formals actuals ]
+  (when (not (= (count actuals) (count formals)))
     (fail "Incorrect number of arguments: " (count actuals)))
+  (zipmap formals actuals))
+
+(defn- oapply-ofn [ fun actuals env ]
   (oeval-do (:code fun)
             (merge (:env fun)
-                   (zipmap (:formals fun) actuals))))
+                   (bind-formal-arguments (:formals fun) actuals))))
 
 (defn- oapply [ fun actuals env ]
   (cond
