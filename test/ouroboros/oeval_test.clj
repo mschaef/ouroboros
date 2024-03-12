@@ -326,6 +326,15 @@
     (is (= 42 (oeval '(((fn [ x ] (fn [] x)) 42))
                      {})))))
 
+(deftest fn-invalid-args
+  (testing "A function cannot have keyword arguments"
+    (is (thrown-with-msg? RuntimeException #"Invalid formal argument"
+                          (oeval '(fn [ :foo ] 42) {}))))
+
+  (testing "A function cannot have numeric arguments"
+    (is (thrown-with-msg? RuntimeException #"Invalid formal argument"
+                          (oeval '(fn [ 12 ] 42) {})))))
+
 (deftest lexical-scope
   (testing "Bindings created by function application are confined to their lexical scope"
     (is (= 1 (oeval '(let [x 1
@@ -334,12 +343,12 @@
                        (fb 2))
                     {}))))
 
-    (testing "Bindings created by let forms are confined to their lexical scope"
+  (testing "Bindings created by let forms are confined to their lexical scope"
     (is (= 1 (oeval '(let [x 1
                            fa (fn [] x)
                            fb (fn [ ] (let [ x 2 ]  (fa)))]
                        (fb))
-                     {})))))
+                    {})))))
 
 (deftest var-defining-form
   (testing "A definition form returns a definition instance"

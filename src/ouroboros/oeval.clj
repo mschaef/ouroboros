@@ -109,6 +109,9 @@
         (recur remaining-bindings forms (assoc env var (oeval var-form env)))))))
 
 (defn- oeval-fn [ [ formals & forms ] env ]
+  (doseq [ formal formals ]
+    (when (not (symbol? formal))
+      (fail "Invalid formal argument: " formal)))
   (OFunction. formals forms env))
 
 (defn- oeval-def* [ [ var defn-form ] env ]
