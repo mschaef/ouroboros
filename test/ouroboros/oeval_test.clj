@@ -326,6 +326,19 @@
   (testing "An anonymous function with two arguments properly returns its first argument"
     (is (= 4 (oeval '((fn [ x y ] y) 3 4) math-env)))))
 
+(deftest fn-variable-arity
+  (testing "An anonymous function with variable arguments can be called with no argments"
+    (is (empty? (oeval '((fn [ & r ] r)) {}))))
+
+  (testing "An anonymous function with variable arguments can be called with multiple argments"
+    (is (= '(3 4) (oeval '((fn [ & r ] r) 3 4) {}))))
+
+  (testing "An anonymous function with variable arguments can be created and called."
+    (is (= '(4) (oeval '((fn [ x & r ] r) 3 4) {}))))
+
+  (testing "An anonymous function with variable arguments can be created and called."
+    (is (= '3 (oeval '((fn [ x & r ] x) 3 4) {})))))
+
 
 (deftest fn-1-arity-closed
   (testing "A function is closed over its lexical environment"
@@ -333,11 +346,19 @@
                      {})))))
 
 (deftest fn-invalid-args
-  (testing "A function cannot have keyword arguments"
+  (testing "A function cannot have keyword formal parameters"
     (is (thrown-with-msg? RuntimeException #"Invalid formal argument"
                           (oeval '(fn [ :foo ] 42) {}))))
 
-  (testing "A function cannot have numeric arguments"
+  (testing "A function cannot have a keyword formal parameter in the rest slot"
+    (is (thrown-with-msg? RuntimeException #"Invalid formal argument"
+                          (oeval '(fn [ & :foo ] 42) {}))))
+
+  (testing "A multi-argument function cannot have a keyword formal parameter in the rest slot"
+    (is (thrown-with-msg? RuntimeException #"Invalid formal argument"
+                          (oeval '(fn [ x & :foo ] 42) {}))))
+
+  (testing "A function cannot have numeric formal parameters"
     (is (thrown-with-msg? RuntimeException #"Invalid formal argument"
                           (oeval '(fn [ 12 ] 42) {})))))
 

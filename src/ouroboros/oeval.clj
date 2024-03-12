@@ -49,7 +49,11 @@
   (loop [env {}
          f formals
          a actuals]
+
     (cond
+      (= '& (first f))
+      (assoc env (second f) a)
+
       (and (empty? f) (empty? a))
       env
 
