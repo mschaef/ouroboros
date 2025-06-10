@@ -2,10 +2,12 @@
   (:use ouroboros.oeval))
 
 (def interpreter-definitions
-  '(
-    (def* defmacro
-      (macro* (fn[ name formals & code ]
+  '((def* defmacro
+      (macro* (fn [ name formals & code ]
                 (list 'def* name (list 'macro* (list* 'fn formals code))))))
+
+    (defmacro def [ name value ]
+      (list 'def* name value))
 
     (defmacro defn [ name formals & code ]
       (list 'def* name (list* 'fn formals code)))))
