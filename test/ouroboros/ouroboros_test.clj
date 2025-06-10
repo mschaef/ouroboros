@@ -33,6 +33,14 @@
     (let [ env (interp-load-string "(def value (+ 12 23))")]
       (is (= 35 (interp-eval 'value env)))))
 
+  (testing "It is possible to refer to variables defined in previous expressions"
+    (let [env (interp-load-string
+               (str
+                "(def pt {})"
+                "(def pt (assoc pt :x 3))"
+                "(def pt (assoc pt :y 4))"))]
+      (is (= {:x 3 :y 4} (interp-eval 'pt env)))))
+
   (testing "It is possible to define a function"
     (let [ env (interp-load-string "(defn test-incr [ x ] (+ x 1))")]
       (is (= 10 (interp-eval '(test-incr 9) env)))))
