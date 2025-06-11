@@ -71,4 +71,14 @@
                 (str
                  "(defn test-incr [ x ] (+ x 11))"
                  "(defn test-mul [ x ] (* x 3))"))]
-      (is (= 102 (interp-eval '(test-mul (test-incr 23)) env))))))
+      (is (= 102 (interp-eval '(test-mul (test-incr 23)) env)))))
+
+  (testing "The when macro correctly expands"
+    (let [ env (interp-load-string
+                (str
+                 "(def x 10)"
+                 "(def y -10)"
+                 "(def true-result (when (> x 0) :true))"
+                 "(def false-result (when (> y 0) :true))"))]
+      (is (= :true (interp-eval 'true-result env)))
+      (is (= nil (interp-eval 'false-result env))))))
