@@ -41,6 +41,27 @@
                 "(def pt (assoc pt :y 4))"))]
       (is (= {:x 3 :y 4} (interp-eval 'pt env)))))
 
+  (testing "It is possible to use quasiquote syntax."
+    (let [env (interp-load-string
+               (str
+                "(def x 42)"
+                "(def y `(~x ~(* x 2)))"))]
+      (is (= '(42 84) (interp-eval 'y env)))))
+
+    (testing "It is possible to use splicing quasiquote syntax in a sequence."
+      (let [env (interp-load-string
+                 (str
+                  "(def x '(1 2 3))"
+                  "(def y `(~@x 4))"))]
+        (is (= '(1 2 3 4) (interp-eval 'y env)))))
+
+  (testing "It is possible to use splicing quasiquote syntax in a vector."
+    (let [env (interp-load-string
+               (str
+                "(def x [1 2 3])"
+                "(def y `[~@x 4])"))]
+      (is (= [1 2 3 4] (interp-eval 'y env)))))
+
   (testing "It is possible to define a function"
     (let [ env (interp-load-string "(defn test-incr [ x ] (+ x 1))")]
       (is (= 10 (interp-eval '(test-incr 9) env)))))
